@@ -1,0 +1,106 @@
+import java.util.*;
+
+ class calculator {
+    private static double result = 0;
+    private static final List<Double> history = new ArrayList<>();
+    private static final Map<String, Double> namedResults = new HashMap<>();
+    private static final Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Calculator!");
+
+        while (true) {
+            System.out.println("\nCurrent result: " + result);
+            System.out.println("Type '+ number' to add, '- number' to subtract,");
+            System.out.println("'history' to view past results, 'save name' to store current result,");
+            System.out.println("'get name' to recall a saved result, or 'exit' to quit:");
+
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("Goodbye!");
+                break;
+            } else if (input.equalsIgnoreCase("history")) {
+                printHistory();
+            } else if (input.toLowerCase().startsWith("save ")) {
+                saveCurrentResult(input);
+            } else if (input.toLowerCase().startsWith("get ")) {
+                getSavedResult(input);
+            } else if (input.startsWith("+") || input.startsWith("-")) {
+                result = handleOperation(input);
+            } else {
+                System.out.println("Sorry, I didn't understand that. Try again.");
+            }
+        }
+    }
+
+    private static double handleOperation(String input) {
+        String[] parts = input.split(" ");
+        if (parts.length != 2) {
+            System.out.println("Please use the format '+ number' or '- number'.");
+            return result;
+        }
+
+        try {
+            double number = Double.parseDouble(parts[1]);
+
+            // Save the previous result before changing it
+            history.add(result);
+
+            if (parts[0].equals("+")) {
+                result += number;
+            } else if (parts[0].equals("-")) {
+                result -= number;
+            } else {
+                System.out.println("Invalid operator. Use '+' or '-'.");
+                return result;
+            }
+
+            // Save the new result to history
+            history.add(result);
+        } catch (NumberFormatException e) {
+            System.out.println("That doesn't look like a number. Try again.");
+        }
+
+        return result;
+    }
+
+    private static void printHistory() {
+        if (history.isEmpty()) {
+            System.out.println("No calculations yet.");
+        } else {
+            System.out.println("Calculation History:");
+            for (double value : history) {
+                System.out.println(value);
+            }
+        }
+    }
+
+    private static void saveCurrentResult(String input) {
+        String[] parts = input.split(" ", 2);
+        if (parts.length < 2 || parts[1].trim().isEmpty()) {
+            System.out.println("Please give a name to save this result under.");
+            return;
+        }
+
+        String name = parts[1].trim();
+        namedResults.put(name, result);
+        System.out.println("Saved result " + result + " as '" + name + "'");
+    }
+
+    private static void getSavedResult(String input) {
+        String[] parts = input.split(" ", 2);
+        if (parts.length < 2 || parts[1].trim().isEmpty()) {
+            System.out.println("Please provide a name to look up.");
+            return;
+        }
+
+        String name = parts[1].trim();
+        if (namedResults.containsKey(name)) {
+            result = namedResults.get(name);
+            System.out.println("Loaded result: " + result);
+        } else {
+            System.out.println("No saved result with the name '" + name + "'");
+        }
+    }
+}
